@@ -49,12 +49,14 @@ services:
     image: ghcr.io/matella/hots-uploader:latest
     container_name: storm-codex-uploader
     profiles: ["uploader"]
+    # NB : defaults vides volontaires — un `${VAR:?}` ici casserait `docker compose up` MÊME sans le
+    # profil. Avec `--profile uploader`, renseigne UPLOADER_TOKEN + REPLAYS_DIR dans .env.
     environment:
       SERVER_URL: ${UPLOADER_SERVER_URL:-http://storm-codex:8088}
-      AUTH_TOKEN: ${UPLOADER_TOKEN:?définis un token d'upload (Admin → Upload tokens)}
+      AUTH_TOKEN: ${UPLOADER_TOKEN:-}
       REPLAY_DIR: /replays
     volumes:
-      - ${REPLAYS_DIR:?chemin du dossier Heroes of the Storm/Accounts}:/replays:ro
+      - ${REPLAYS_DIR:-/tmp/hots-replays}:/replays:ro
     restart: unless-stopped
 
 volumes:
