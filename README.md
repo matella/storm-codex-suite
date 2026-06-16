@@ -3,35 +3,45 @@
 All-in-one **Heroes of the Storm** companion: replay stats, OBS overlays, and integrated patch
 notes — one `docker compose up`, self-hosted, pre-seeded. No scraping, no setup gymnastics.
 
-## Run it
+## Quick start
 
+You need **Docker Desktop** (Windows/macOS) or Docker + Compose (Linux). Nothing else.
+
+### 1. Launch the site
 ```bash
 git clone https://github.com/matella/storm-codex-suite
 cd storm-codex-suite
-cp .env.example .env        # tweak if you want (all defaults are sane for local use)
+cp .env.example .env          # Windows: copy .env.example .env
 docker compose up -d
 ```
+Open **http://localhost:5102**. The hero/talent/patch **referential auto-downloads** (a published
+snapshot, refreshed ≤24 h after each HotS patch) — patch notes and hero data work immediately, no
+scraping.
 
-Open **http://localhost:5102**. A first-run wizard walks you through:
-1. **Set your in-game name(s)** (Admin → My identity).
-2. **Connect the uploader** (Admin → Upload tokens) — see below.
-3. **Add OBS overlays** (optional): `/queue`, `/ticker`, `/widget?me=<name>`, `/now-playing`.
+### 2. Configure yourself
+Admin is **open by default** (`ADMIN_TOKEN` empty) — no login on a local network.
+1. **Admin → My identity** — your HotS name(s), comma-separated for multiple accounts.
+2. **Admin → Upload tokens** — create a token and copy it.
 
-The hero/talent/patch **referential is auto-downloaded** (a published snapshot) — patch notes and
-hero data work out of the box, and refresh automatically (≤24 h after a new HotS patch).
+### 3. Send your replays (uploader)
+The uploader bakes **no** server URL or token — you set them in `.env`, then start its profile:
+```bash
+UPLOADER_TOKEN=<token from step 2>
+REPLAYS_DIR=C:/Users/<you>/Documents/Heroes of the Storm/Accounts
+# UPLOADER_SERVER_URL=http://storm-codex:8088   ← leave as-is if everything runs on one machine
+```
+```bash
+docker compose --profile uploader up -d
+```
+It backfills your existing replays, then watches for new games. Stats fill in as replays upload —
+before that, "0 heroes" is normal.
 
-## The uploader (sends your replays)
+> **Server on a different machine?** Set `UPLOADER_SERVER_URL=http://<server-ip>:5102` and run the
+> uploader on the gaming PC. Under Docker Desktop, allow file sharing for the drive holding the replays.
 
-Replays live on your **gaming PC**. The uploader carries **no baked server URL or token** — you set
-both at runtime, so the same build works against any server. Two options:
-
-- **Headless Docker** (works out of the box): set `UPLOADER_TOKEN` (Admin → Upload tokens),
-  `UPLOADER_SERVER_URL` (e.g. `http://<server-ip>:5102`) and `REPLAYS_DIR` (your
-  `Heroes of the Storm/Accounts` folder) in `.env`, then `docker compose --profile uploader up -d`.
-- **Native Windows `.exe`** (GUI, tray, auto-start): build it from
-  [Hots-Overlay](https://github.com/matella/Hots-Overlay) (`client-rs`, Inno Setup) — no prebuilt
-  binary is published. On first launch a wizard asks for the server URL + upload token + replays
-  folder; nothing is hardcoded.
+### 4. OBS overlays (optional)
+Add **Browser Sources** (1920×1080, transparent background):
+`http://localhost:5102/queue` · `/ticker` · `/widget?me=<name>` · `/now-playing`
 
 ## What's inside
 
