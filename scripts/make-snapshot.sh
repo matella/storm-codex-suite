@@ -15,18 +15,19 @@ curl -fsS "$HPN/api/heroes"        > "$OUT/heroes.json"
 curl -fsS "$HPN/api/battlegrounds" > "$OUT/battlegrounds.json"
 curl -fsS "$HPN/api/patches?page=1&pageSize=500" > "$OUT/patches.json"
 
-echo "→ talents (par héros) + détails patches"
+echo "→ détails héros (talents + attributeId) + détails patches"
 python3 - "$HPN" "$OUT" <<'PY'
 import json, os, sys, urllib.request
 hpn, out = sys.argv[1], sys.argv[2]
 def get(p): return json.load(urllib.request.urlopen(hpn + p))
-talents = {}
+# détail complet par héros : storm-codex en a besoin pour dim_talents (attributeId → nom parser).
+heroes = {}
 for h in get("/api/heroes"):
     short = h.get("shortName")
     if not short: continue
-    try: talents[short] = get(f"/api/heroes/{short}").get("talents")
+    try: heroes[short] = get(f"/api/heroes/{short}")
     except Exception: pass
-json.dump(talents, open(f"{out}/talents.json", "w"))
+json.dump(heroes, open(f"{out}/hero-details.json", "w"))
 details = {}
 for it in get("/api/patches?page=1&pageSize=500").get("items", []):
     iid = it.get("internalId")
@@ -34,7 +35,7 @@ for it in get("/api/patches?page=1&pageSize=500").get("items", []):
     try: details[iid] = get(f"/api/patches/{iid}")
     except Exception: pass
 json.dump(details, open(f"{out}/patch-details.json", "w"))
-print(f"  {len(talents)} héros talents, {len(details)} patch details")
+print(f"  {len(heroes)} héros détaillés, {len(details)} patch details")
 PY
 
 echo "→ images (portraits + battlegrounds)"
