@@ -27,7 +27,8 @@ services:
     environment:
       DATABASE_URL: postgres://storm:${POSTGRES_PASSWORD:-storm}@storm-codex-pg:5432/storm_codex
       BIND_ADDR: 0.0.0.0:8088
-      WEB_DIR: /web
+      # NB : ne PAS forcer WEB_DIR — l'image sert déjà le SPA depuis /app/web (défaut). Un mauvais
+      # chemin ici (dossier absent) désactive silencieusement le front (config filtre is_dir).
       IMAGES_DIR: /data/images
       ARCHIVE_DIR: /data/archive
       RAW_CACHE_DIR: /data/raw-cache
