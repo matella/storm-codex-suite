@@ -1,3 +1,5 @@
+**English** · [Français](README.fr.md)
+
 # Storm Codex Suite
 
 All-in-one **Heroes of the Storm** companion: replay stats, OBS overlays, and integrated patch
