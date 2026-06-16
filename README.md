@@ -22,12 +22,16 @@ hero data work out of the box, and refresh automatically (≤24 h after a new Ho
 
 ## The uploader (sends your replays)
 
-Replays live on your **gaming PC**. Two options:
+Replays live on your **gaming PC**. The uploader carries **no baked server URL or token** — you set
+both at runtime, so the same build works against any server. Two options:
 
-- **Native (recommended, Windows):** download the uploader `.exe`, point it at the server URL + your
-  upload token + your `Documents/Heroes of the Storm/Accounts` folder. Watches + backfills.
-- **Headless Docker** (tout-Docker setups, on the gaming PC): set `UPLOADER_TOKEN` + `REPLAYS_DIR`
-  in `.env`, then `docker compose --profile uploader up -d`.
+- **Headless Docker** (works out of the box): set `UPLOADER_TOKEN` (Admin → Upload tokens),
+  `UPLOADER_SERVER_URL` (e.g. `http://<server-ip>:5102`) and `REPLAYS_DIR` (your
+  `Heroes of the Storm/Accounts` folder) in `.env`, then `docker compose --profile uploader up -d`.
+- **Native Windows `.exe`** (GUI, tray, auto-start): build it from
+  [Hots-Overlay](https://github.com/matella/Hots-Overlay) (`client-rs`, Inno Setup) — no prebuilt
+  binary is published. On first launch a wizard asks for the server URL + upload token + replays
+  folder; nothing is hardcoded.
 
 ## What's inside
 
