@@ -52,7 +52,7 @@ services:
     environment:
       SERVER_URL: ${UPLOADER_SERVER_URL:-http://storm-codex:8088}
       AUTH_TOKEN: ${UPLOADER_TOKEN:?définis un token d'upload (Admin → Upload tokens)}
-      REPLAY_DIRS: /replays
+      REPLAY_DIR: /replays
     volumes:
       - ${REPLAYS_DIR:?chemin du dossier Heroes of the Storm/Accounts}:/replays:ro
     restart: unless-stopped
