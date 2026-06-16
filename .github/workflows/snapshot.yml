@@ -1,8 +1,12 @@
-# Produit + publie le snapshot référentiel (referential.tar.gz) comme GitHub Release.
-# Lance HotsPatchNotes (ingestion fraîche), exporte via make-snapshot.sh, publie. Cron quotidien.
+# Produit + publie le snapshot référentiel (referential.tar.gz) comme GitHub Release, à partir d'une
+# instance HotsPatchNotes FRAÎCHE (re-scrape de zéro).
+#
+# NOTE : ce n'est PAS le chemin de production. Le snapshot officiel est régénéré depuis le HotsPatchNotes
+# du box (données accumulées riches) via scripts/publish-snapshot.sh en cron — voir README. Ce workflow
+# reste en déclenchement MANUEL uniquement, comme dépannage / bootstrap public (nécessite que l'image
+# ghcr.io/matella/hotspatchnotes-api existe). Pas de cron → pas d'échec quotidien.
 name: referential-snapshot
 on:
-  schedule: [{ cron: "0 6 * * *" }] # tous les jours 06:00 UTC
   workflow_dispatch: {}
 jobs:
   snapshot:
