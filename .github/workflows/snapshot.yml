@@ -1,0 +1,29 @@
+# Produit + publie le snapshot référentiel (referential.tar.gz) comme GitHub Release.
+# Lance HotsPatchNotes (ingestion fraîche), exporte via make-snapshot.sh, publie. Cron quotidien.
+name: referential-snapshot
+on:
+  schedule: [{ cron: "0 6 * * *" }] # tous les jours 06:00 UTC
+  workflow_dispatch: {}
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # créer la Release
+    steps:
+      - uses: actions/checkout@v4
+      # Démarre l'API HotsPatchNotes (image publiée) pour produire des données fraîches.
+      - name: Run HotsPatchNotes API
+        run: |
+          docker run -d --name hpn -p 5001:8080 ghcr.io/matella/hotspatchnotes-api:latest
+          for i in $(seq 1 60); do curl -fsS http://localhost:5001/api/heroes >/dev/null 2>&1 && break; sleep 3; done
+      - name: Build snapshot
+        run: |
+          HPN_URL=http://localhost:5001 ./scripts/make-snapshot.sh ./snapshot
+          mv snapshot.tar.gz referential.tar.gz
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: referential-${{ github.run_number }}
+          files: referential.tar.gz
+          # alias stable consommé par REFERENTIAL_URL=.../releases/latest/download/referential.tar.gz
+          make_latest: true

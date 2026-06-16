@@ -1,0 +1,62 @@
+# Storm Codex Suite — all-in-one HotS stats + overlays + patch notes.
+# Usage : copier .env.example → .env, ajuster, puis `docker compose up -d`.
+# Images publiées sur ghcr.io ; aucun build requis côté utilisateur.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: storm-codex-pg
+    environment:
+      POSTGRES_USER: storm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-storm}
+      POSTGRES_DB: storm_codex
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U storm"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  storm-codex:
+    image: ghcr.io/matella/storm-codex:latest
+    container_name: storm-codex-server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://storm:${POSTGRES_PASSWORD:-storm}@storm-codex-pg:5432/storm_codex
+      BIND_ADDR: 0.0.0.0:8088
+      WEB_DIR: /web
+      IMAGES_DIR: /data/images
+      ARCHIVE_DIR: /data/archive
+      RAW_CACHE_DIR: /data/raw-cache
+      # vide = mode ouvert (local) ; définir pour exiger un Bearer admin
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-}
+      # référentiel (héros/talents/patches + images) : snapshot publié → autonome, sans HotsPatchNotes live
+      REFERENTIAL_URL: ${REFERENTIAL_URL:-https://github.com/matella/storm-codex-suite/releases/latest/download/referential.tar.gz}
+      # notif nouveau patch (optionnel) : Discord / ntfy / endpoint générique
+      PATCH_WEBHOOK_URL: ${PATCH_WEBHOOK_URL:-}
+    ports:
+      - "${PORT:-5102}:8088"
+    volumes:
+      - sc-data:/data
+    restart: unless-stopped
+
+  # Uploader headless OPTIONNEL (profil "uploader") : pour les setups tout-Docker sur le PC de jeu.
+  # L'.exe natif Windows reste l'option recommandée. Bind-mount le dossier replays HotS.
+  uploader:
+    image: ghcr.io/matella/hots-uploader:latest
+    container_name: storm-codex-uploader
+    profiles: ["uploader"]
+    environment:
+      SERVER_URL: ${UPLOADER_SERVER_URL:-http://storm-codex:8088}
+      AUTH_TOKEN: ${UPLOADER_TOKEN:?définis un token d'upload (Admin → Upload tokens)}
+      REPLAY_DIRS: /replays
+    volumes:
+      - ${REPLAYS_DIR:?chemin du dossier Heroes of the Storm/Accounts}:/replays:ro
+    restart: unless-stopped
+
+volumes:
+  pg-data:
+  sc-data:
