@@ -2,8 +2,7 @@
 
 # Storm Codex Suite
 
-All-in-one **Heroes of the Storm** companion: replay stats, OBS overlays, and integrated patch
-notes — one `docker compose up`, self-hosted, pre-seeded. No scraping, no setup gymnastics.
+Storm Codex Suite runs the [Storm Codex](https://github.com/matella/storm-codex) web app and PostgreSQL with Docker Compose. It provides replay stats, OBS overlays, and patch notes. If you only want to browse your own replays on Windows, use the standalone app instead.
 
 ## Quick start
 
@@ -16,9 +15,7 @@ cd storm-codex-suite
 cp .env.example .env          # Windows: copy .env.example .env
 docker compose up -d
 ```
-Open **http://localhost:5102**. The hero/talent/patch **referential auto-downloads** (a published
-snapshot, refreshed ≤24 h after each HotS patch) — patch notes and hero data work immediately, no
-scraping.
+Open **http://localhost:5102**. The server downloads reference data in the background. On first start, hero data and patch notes may take a moment to appear.
 
 ### 2. Configure yourself
 Admin is **open by default** (`ADMIN_TOKEN` empty) — no login on a local network.
@@ -53,8 +50,7 @@ Add **Browser Sources** (1920×1080, transparent background):
 | `postgres` | single shared DB |
 | `uploader` (optional) | headless replay uploader (Docker) |
 
-Patch-notes data is produced by **HotsPatchNotes** (maintainer-side ingestion) and shipped as a
-versioned **snapshot** (GitHub Release) — see `scripts/make-snapshot.sh` + the `snapshot` workflow.
+Current Storm Codex images use the schema-v1 releases from [HotsPatchNotes](https://github.com/matella/HeroesOfTheStormPatchNotes). The server uses that source by default and checks for updates every 24 hours. The `REFERENTIAL_URL` entry in this repository's Compose file and sample env is legacy; current images ignore it. To override the source, add `REFDATA_URL` to the `storm-codex` service environment in a Compose override. See the [Storm Codex operations guide](https://github.com/matella/storm-codex/blob/main/docs/spec/09-operations.md).
 
 ## Backups
 

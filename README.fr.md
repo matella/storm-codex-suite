@@ -2,9 +2,7 @@
 
 # Storm Codex Suite
 
-Compagnon tout-en-un pour **Heroes of the Storm** : stats de replays, overlays OBS et patch notes
-intégrés — un seul `docker compose up`, auto-hébergé, pré-rempli. Aucun scraping, aucune gymnastique
-d'installation.
+Storm Codex Suite lance l’application web [Storm Codex](https://github.com/matella/storm-codex) et PostgreSQL avec Docker Compose. La suite regroupe les statistiques de replays, les overlays OBS et les notes de patch. Pour consulter tes propres replays sous Windows, tu peux utiliser l’application autonome à la place.
 
 ## Démarrage rapide
 
@@ -17,9 +15,7 @@ cd storm-codex-suite
 cp .env.example .env          # Windows : copy .env.example .env
 docker compose up -d
 ```
-Ouvre **http://localhost:5102**. Le **référentiel** héros/talents/patches se **télécharge tout seul**
-(un snapshot publié, rafraîchi ≤ 24 h après chaque patch HotS) — les patch notes et les données héros
-fonctionnent immédiatement, sans scraping.
+Ouvre **http://localhost:5102**. Le serveur télécharge le référentiel en arrière-plan. Au premier lancement, les données des héros et les notes de patch peuvent mettre un moment à apparaître.
 
 ### 2. Te configurer
 L'admin est **ouvert par défaut** (`ADMIN_TOKEN` vide) — pas de login sur un réseau local.
@@ -55,9 +51,7 @@ Ajoute des **Browser Sources** (1920×1080, fond transparent) :
 | `postgres` | base de données unique |
 | `uploader` (optionnel) | uploader de replays headless (Docker) |
 
-Les données de patch notes sont produites par **HotsPatchNotes** (ingestion côté mainteneur) et
-livrées sous forme de **snapshot** versionné (GitHub Release) — voir `scripts/make-snapshot.sh` +
-le workflow `snapshot`.
+Les images Storm Codex actuelles utilisent le référentiel au format v1 publié par [HotsPatchNotes](https://github.com/matella/HeroesOfTheStormPatchNotes). Le serveur utilise cette source par défaut et vérifie les mises à jour toutes les 24 heures. L’entrée `REFERENTIAL_URL` dans le fichier Compose et l’exemple `.env` est héritée de l’ancienne version : les images actuelles l’ignorent. Pour changer de source, ajoute `REFDATA_URL` à l’environnement du service `storm-codex` dans un fichier de surcharge Compose. Voir le [guide d’exploitation](https://github.com/matella/storm-codex/blob/main/docs/spec/09-operations.md).
 
 ## Sauvegardes
 
